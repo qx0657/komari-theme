@@ -1,0 +1,9 @@
+{
+  "name": "Glow",
+  "short": "Glow",
+  "description": "Junimo fork with dark cards, billing overview, and optional airport usage.",
+  "version": "1.0.12",
+  "author": "Glow",
+  "url": "https://github.com/qx0657/glow-komari",
+  "preview": "preview.png"
+}
