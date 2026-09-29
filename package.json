@@ -1,7 +1,7 @@
 {
   "name": "glow-komari",
   "private": true,
-  "version": "1.0.12",
+  "version": "1.0.13",
   "type": "module",
   "description": "Glow Komari theme, forked from Junimo",
   "author": "Glow",

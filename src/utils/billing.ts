@@ -113,7 +113,7 @@ export function formatRenewalPrice({
 }) {
   if (!Number.isFinite(price)) return null;
   if (price === -1) return "免费";
-  if (price === 0) return isLongTermExpire(expired_at) ? "免费" : null;
+  if (price === 0 && isLongTermExpire(expired_at)) return "免费";
   if (price < 0) return null;
 
   const symbol = currency?.trim() || "¥";

@@ -63,7 +63,7 @@ describe("formatRenewalPrice", () => {
     expect(formatRenewalPrice({ price: -1, currency: "¥", billing_cycle: 365 })).toBe("免费");
   });
 
-  it("renders zero prices as free only for long-term expiry", () => {
+  it("renders zero prices with their billing cycle and long-term expiry as free", () => {
     expect(
       formatRenewalPrice({
         price: 0,
@@ -79,7 +79,8 @@ describe("formatRenewalPrice", () => {
         billing_cycle: 365,
         expired_at: inDays(30),
       }),
-    ).toBeNull();
+    ).toBe("¥0/年");
+    expect(formatRenewalPrice({ price: 0, currency: "¥", billing_cycle: 30 })).toBe("¥0/月");
   });
 
   it("renders positive prices with currency and billing cycle", () => {
