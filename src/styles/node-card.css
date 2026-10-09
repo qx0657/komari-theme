@@ -161,11 +161,12 @@
   letter-spacing: 0.02em;
 }
 
-/* V4/V6 与 IP 属性作为一组换行，避免「IDC机房」单独掉到下一行。 */
+/* V4/V6 与 IP 属性同一组。五项属性放不下时在卡片宽度内换行，不把整组顶出卡片。 */
 .ip-stack-group {
-  display: inline-flex;
-  flex: 0 0 auto;
-  flex-wrap: nowrap;
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  max-width: 100%;
   align-items: center;
   gap: 6px;
 }

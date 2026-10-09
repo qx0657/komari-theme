@@ -1,5 +1,5 @@
 // V4/V6 双栈标识：后端仅在登录态下发真实 ipv4/ipv6，前端只读"有没有"来亮对应标签，
-// 不渲染 IP 本身。紧挨其后的 extra 是主题设置里的 IP 属性（原生/广播、家宽/IDC）。
+// 不渲染 IP 本身。紧挨其后的 extra 按固定顺序：原生/广播、IDC/家宽、ASN、ISP/非ISP、直连/NAT。
 export function IpStackBadges({
   ipv4,
   ipv6,

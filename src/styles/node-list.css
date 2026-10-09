@@ -185,10 +185,9 @@
   display: flex;
   min-width: 0;
   width: 100%;
-  max-height: 20px;
+  flex-wrap: wrap;
   align-items: center;
   gap: 5px;
-  overflow: hidden;
 }
 
 /* 列表档标签比卡片略小,一行密集排列更耐看。 */

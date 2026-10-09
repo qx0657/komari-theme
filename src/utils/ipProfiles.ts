@@ -24,6 +24,8 @@ const IP_BADGE_COLOR_BY_LABEL: Record<string, string> = {
   机房: "slate",
   nat: "gray",
   直连: "mint",
+  isp: "jade",
+  非isp: "amber",
 };
 
 export function inferIpBadgeColor(label: string): string {
@@ -31,6 +33,7 @@ export function inferIpBadgeColor(label: string): string {
   if (!key) return "violet";
   const mapped = IP_BADGE_COLOR_BY_LABEL[key];
   if (mapped) return mapped;
+  if (/^as\d+$/.test(key)) return "violet";
   if (/(cn2gia|9929|cmin2)/i.test(key)) return "blue";
   return "violet";
 }
@@ -87,16 +90,19 @@ function normalizeProfile(raw: unknown): NodeIpProfile | null {
 
 /**
  * 分享包默认：空。现网标签写在 theme_settings.ipProfiles。
- * 口径（原生/广播、家宽/IDC、NAT）见 SAMPLE_IP_PROFILES 注释。
+ * 口径见 SAMPLE_IP_PROFILES 注释。现网每台都按这个顺序写全。
  */
 export const DEFAULT_IP_PROFILES: NodeIpProfile[] = [];
 
 /**
  * 示例（仅主题管理页在列表为空时「填入示例」，不作 runtime 缺省回落）。
- * 口径：
- * - 原生/广播：注册地是否等于使用地
- * - 家宽/IDC：线路类型
- * - NAT：公网不在网卡上
+ * 每台顺序固定：
+ * - 原生/广播：地址注册国是否等于使用地
+ * - IDC机房/家宽：线路类型
+ * - ASnnnnn：宣告该地址的 ASN
+ * - ISP/非ISP：ASN 所有者是不是接入 ISP（云和托管写非ISP）
+ * - 直连/NAT：公网地址在不在网卡上
+ * 线路名（CN2GIA 等）加在这五项后面。
  */
 export const SAMPLE_IP_PROFILES: NodeIpProfile[] = [
   {
@@ -104,6 +110,9 @@ export const SAMPLE_IP_PROFILES: NodeIpProfile[] = [
     badges: [
       { label: "原生", color: "green" },
       { label: "IDC机房", color: "slate" },
+      { label: "AS64500", color: "violet" },
+      { label: "非ISP", color: "amber" },
+      { label: "直连", color: "mint" },
     ],
   },
   {
@@ -111,6 +120,8 @@ export const SAMPLE_IP_PROFILES: NodeIpProfile[] = [
     badges: [
       { label: "原生", color: "green" },
       { label: "家宽", color: "blue" },
+      { label: "AS64501", color: "violet" },
+      { label: "ISP", color: "jade" },
       { label: "NAT", color: "gray" },
     ],
   },

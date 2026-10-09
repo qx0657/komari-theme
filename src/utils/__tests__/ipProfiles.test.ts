@@ -48,12 +48,12 @@ describe("resolveNodeIpBadges", () => {
       resolveNodeIpBadges({ uuid: "x", name: "example-tokyo", public_remark: "" }, SAMPLE_IP_PROFILES).map(
         (badge) => badge.label,
       ),
-    ).toEqual(["原生", "IDC机房"]);
+    ).toEqual(["原生", "IDC机房", "AS64500", "非ISP", "直连"]);
     expect(
       resolveNodeIpBadges({ uuid: "example-home", name: "other", public_remark: "" }, SAMPLE_IP_PROFILES).map(
         (badge) => badge.label,
       ),
-    ).toEqual(["原生", "家宽", "NAT"]);
+    ).toEqual(["原生", "家宽", "AS64501", "ISP", "NAT"]);
     expect(
       resolveNodeIpBadges({ uuid: "unknown", name: "Tokyo Edge", public_remark: "" }, SAMPLE_IP_PROFILES),
     ).toEqual([]);
@@ -87,5 +87,10 @@ describe("copy helpers", () => {
     expect(inferIpBadgeColor("家宽")).toBe("blue");
     expect(inferIpBadgeColor("IDC机房")).toBe("slate");
     expect(inferIpBadgeColor("CN2GIA")).toBe("blue");
+    expect(inferIpBadgeColor("AS9908")).toBe("violet");
+    expect(inferIpBadgeColor("ISP")).toBe("jade");
+    expect(inferIpBadgeColor("非ISP")).toBe("amber");
+    expect(inferIpBadgeColor("直连")).toBe("mint");
+    expect(inferIpBadgeColor("NAT")).toBe("gray");
   });
 });

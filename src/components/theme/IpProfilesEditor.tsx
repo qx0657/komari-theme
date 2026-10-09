@@ -70,7 +70,7 @@ export function IpProfilesEditor({
                     badges: textToBadges(event.target.value),
                   })
                 }
-                placeholder="原生, IDC机房"
+                placeholder="原生, IDC机房, AS64500, 非ISP, 直连"
                 aria-label={`第 ${index + 1} 条 IP 标签`}
                 className="w-full bg-transparent px-0 py-1 text-[13px] outline-none"
               />
