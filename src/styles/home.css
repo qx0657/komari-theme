@@ -808,9 +808,10 @@
    chip 的悬停/选中态与分组 tab、费用抽屉排序 tab 共用同一组样式。 */
 .home-region-bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px 12px;
   margin-bottom: 16px;
   padding: 10px 12px;
   border: 1px solid color-mix(in srgb, var(--border-strong) 54%, transparent);
@@ -823,11 +824,102 @@
 
 .home-region-chips {
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   min-width: 0;
+}
+
+/* 成对标签贴在地区和「全部显示」之间。宽屏靠右填上原来的空档，窄屏整行换到下面。 */
+.home-tag-filters {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.home-tag-filters[data-align="start"] {
+  justify-content: flex-start;
+}
+
+.home-tag-pair {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid color-mix(in srgb, var(--border-strong) 54%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--fill-tertiary) 70%, transparent);
+}
+
+.home-tag-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 28px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1;
+  white-space: nowrap;
+  user-select: none;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.home-tag-option:hover:not(:disabled):not([data-active="true"]) {
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--hover-bg-a) 72%, transparent);
+}
+
+.home-tag-option[data-active="true"] {
+  background: var(--tag-bg);
+  color: var(--text-primary);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tag-fg) 48%, transparent);
+}
+
+.home-tag-option:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+
+.home-tag-option:focus-visible {
+  outline-offset: 1px;
+}
+
+.home-tag-dot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--tag-fg);
+  opacity: 0.72;
+}
+
+.home-tag-option[data-active="true"] .home-tag-dot {
+  opacity: 1;
+}
+
+.home-tag-option .home-region-chip-count {
+  height: 16px;
+  min-width: 16px;
+  font-size: 10px;
+}
+
+.home-tag-option[data-active="true"] .home-region-chip-count {
+  background: color-mix(in srgb, var(--tag-fg) 22%, transparent);
+  color: var(--text-secondary);
 }
 
 .home-region-show-all {
@@ -926,6 +1018,19 @@
   color: var(--text-secondary);
 }
 
+@media (max-width: 1100px) {
+  /* 标签换到下一行，地区和「全部显示」留在第一行。 */
+  .home-region-show-all {
+    order: 2;
+  }
+
+  .home-tag-filters {
+    order: 3;
+    flex-basis: 100%;
+    justify-content: flex-start;
+  }
+}
+
 @media (max-width: 560px) {
   .home-region-bar {
     flex-wrap: wrap;
@@ -935,6 +1040,11 @@
   .home-region-show-all {
     min-height: 30px;
     padding: 0 8px;
+  }
+
+  .home-tag-option {
+    min-height: 28px;
+    padding: 0 7px;
   }
 }
 

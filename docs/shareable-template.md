@@ -8,7 +8,7 @@
 |---|---|
 | `extraAssets` 缺省 / 非数组 / `[]` | 空列表。首页不显示域名、机场、ISP 卡 |
 | 已保存的非空列表 | 只用保存值。机场字段是 `plan`、`resetDayOfMonth`、`quotaGb`、`usageSourceId` |
-| `ipProfiles` 缺省 / 非数组 / `[]` | 空列表 |
+| `ipProfiles` 缺省 / 非数组 / `[]` | 空列表。首页不显示标签筛选 |
 | `airportUsageUrl` 缺省 | 空。只显示每月额度 |
 | 主题管理「填入示例」 | 列表为空时才出现，填的是通用示例 |
 

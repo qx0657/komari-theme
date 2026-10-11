@@ -36,6 +36,17 @@ import {
   type HomeRegionOption,
 } from "@/utils/homeNodes";
 import { getDisplayRegionCode } from "@/utils/geo";
+import { resolveNodeIpBadges } from "@/utils/ipProfiles";
+import {
+  hasTagSelection,
+  labelsMatchTagSelection,
+  lookupTagOption,
+  pruneTagSelection,
+  summarizeTagFilters,
+  tagSelectionsEqual,
+  toggleTagSelection,
+  type TagFilterSelection,
+} from "@/utils/tagFilters";
 import type { HomeSortField } from "@/utils/homeSort";
 import { useHomeSort } from "@/hooks/useHomeSort";
 import { useHomeNodeOrder } from "@/hooks/useHomeNodeOrder";
@@ -46,6 +57,7 @@ import {
   TodayTrafficStatsProvider,
 } from "@/hooks/useTodayTrafficStats";
 import { HomeSortControl } from "./HomeSortControl";
+import { TagFilterGroups, TagFilterProvider, type TagFilterContextValue } from "./TagFilter";
 import {
   getOverviewRating,
   type OverviewRating,
@@ -73,6 +85,7 @@ type MiniGridStyle = CSSProperties & { "--mini-card-min-width": string };
 
 // 标准 UUID 不含逗号，可安全拼成稳定签名。
 const UUID_KEY_SEPARATOR = ",";
+const EMPTY_TAG_LABELS: readonly string[] = [];
 
 type IdleCapableWindow = Window & {
   requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
@@ -366,28 +379,40 @@ function GroupTabs({
   );
 }
 
-// 地区筛选栏:按国旗聚合节点,点击某地区只看该地区;再点一次(或点已选中项)回到全部。
-// 与分组栏是两条独立筛选,可叠加(先分组、后地区)。右侧「全部显示」清掉地区筛选,
+// 地区筛选栏:按国旗聚合节点,点击某地区只看该地区;再点一次回到全部。
+// 中间是成对标签(原生/广播、机房/家宽等),和地区可叠加。右侧「全部显示」清掉这两类筛选,
 // 并把本机隐藏的卡片一起放回来。
 function RegionTabs({
   regions,
   selectedRegion,
   onSelectRegion,
+  tagFilters,
+  tagSelection,
+  onToggleTag,
+  tagFilterActive,
   hiddenCount,
   onShowAll,
 }: {
   regions: HomeRegionOption[];
   selectedRegion: string;
   onSelectRegion: (region: string) => void;
+  tagFilters: ReturnType<typeof summarizeTagFilters>;
+  tagSelection: TagFilterSelection;
+  onToggleTag: (dimensionId: string, optionId: string) => void;
+  tagFilterActive: boolean;
   hiddenCount: number;
   onShowAll: () => void;
 }) {
-  const canShowAll = hiddenCount > 0 || selectedRegion !== HOME_ALL_REGION;
-  const showAllLabel =
-    hiddenCount > 0 ? `全部显示，恢复 ${hiddenCount} 台已隐藏服务器` : "全部显示";
+  const regionActive = selectedRegion !== HOME_ALL_REGION;
+  const canShowAll = hiddenCount > 0 || regionActive || tagFilterActive;
+  const showAllParts = ["全部显示"];
+  if (tagFilterActive) showAllParts.push("清除标签筛选");
+  if (regionActive) showAllParts.push("清除地区筛选");
+  if (hiddenCount > 0) showAllParts.push(`恢复 ${hiddenCount} 台已隐藏服务器`);
+  const showAllLabel = showAllParts.join("，");
   return (
-    <section className="home-region-bar" aria-label="地区筛选">
-      <div className="home-region-chips" role="group">
+    <section className="home-region-bar" aria-label="地区和标签筛选">
+      <div className="home-region-chips" role="group" aria-label="地区筛选">
         {regions.map(({ code, count }) => {
           const active = selectedRegion === code;
           return (
@@ -407,6 +432,12 @@ function RegionTabs({
           );
         })}
       </div>
+      <TagFilterGroups
+        dimensions={tagFilters}
+        selection={tagSelection}
+        onToggle={onToggleTag}
+        align={regions.length > 0 ? "end" : "start"}
+      />
       <button
         type="button"
         className="home-region-show-all"
@@ -471,10 +502,15 @@ export function NodeGrid() {
       : themeSettings.homeSortDirection;
   const [selectedGroup, setSelectedGroup] = useState(HOME_ALL_GROUP);
   const [selectedRegion, setSelectedRegion] = useState(HOME_ALL_REGION);
+  const [tagSelection, setTagSelection] = useState<TagFilterSelection>({});
   const cardHidden = useHomeCardHidden();
   const showEveryCard = useCallback(() => {
     showAllHomeCards();
     setSelectedRegion(HOME_ALL_REGION);
+    setTagSelection({});
+  }, []);
+  const toggleTag = useCallback((dimensionId: string, optionId: string) => {
+    setTagSelection((current) => toggleTagSelection(current, dimensionId, optionId));
   }, []);
   useHomepagePingOverview(mode);
 
@@ -656,12 +692,47 @@ export function NodeGrid() {
     () => getHomeRegionOptions(shownInGroup),
     [shownInGroup],
   );
-  const filteredNodes = useMemo(
+  const regionFilteredNodes = useMemo(
     () =>
       selectedRegion === HOME_ALL_REGION
         ? shownInGroup
         : shownInGroup.filter((node) => getDisplayRegionCode(node.region) === selectedRegion),
     [selectedRegion, shownInGroup],
+  );
+  const badgeLabelsByUuid = useMemo(() => {
+    const map = new Map<string, string[]>();
+    for (const node of visibleMeta) {
+      map.set(
+        node.uuid,
+        resolveNodeIpBadges(node, themeSettings.ipProfiles).map((badge) => badge.label),
+      );
+    }
+    return map;
+  }, [themeSettings.ipProfiles, visibleMeta]);
+  const tagLabelSets = useMemo(
+    () => regionFilteredNodes.map((node) => badgeLabelsByUuid.get(node.uuid) ?? EMPTY_TAG_LABELS),
+    [badgeLabelsByUuid, regionFilteredNodes],
+  );
+  const effectiveTagSelection = useMemo(
+    () => pruneTagSelection(tagSelection, tagLabelSets),
+    [tagLabelSets, tagSelection],
+  );
+  const tagSummary = useMemo(
+    () => summarizeTagFilters(tagLabelSets, effectiveTagSelection),
+    [effectiveTagSelection, tagLabelSets],
+  );
+  const tagFilterActive = hasTagSelection(effectiveTagSelection);
+  const filteredNodes = useMemo(
+    () =>
+      tagFilterActive
+        ? regionFilteredNodes.filter((node) =>
+            labelsMatchTagSelection(
+              badgeLabelsByUuid.get(node.uuid) ?? EMPTY_TAG_LABELS,
+              effectiveTagSelection,
+            ),
+          )
+        : regionFilteredNodes,
+    [badgeLabelsByUuid, effectiveTagSelection, regionFilteredNodes, tagFilterActive],
   );
   // 排序在分组筛选之后。离线永远沉底(写死,见 homeSort);实时网速走防抖(键平滑+滞回+5s 重排)。
   const orderedNodes = useHomeNodeOrder({
@@ -678,6 +749,13 @@ export function NodeGrid() {
       setSelectedGroup(HOME_ALL_GROUP);
     }
   }, [groupOptions, selectedGroup]);
+
+  // 切到没有这一侧的地区后，拿掉已经对不上的标签，避免筛着一个看不见的条件。
+  useEffect(() => {
+    if (!tagSelectionsEqual(tagSelection, effectiveTagSelection)) {
+      setTagSelection(effectiveTagSelection);
+    }
+  }, [effectiveTagSelection, tagSelection]);
 
   // 选中的地区在当前分组里不存在了(切换分组/节点变化)就回到全部。
   useEffect(() => {
@@ -746,6 +824,33 @@ export function NodeGrid() {
   const regionFilterEnabled =
     themeSettings.isReady && themeSettings.showRegionBar && regionCountBeforeHide > 1;
   const showRegionBar = regionFilterEnabled || hiddenInView > 0;
+  const showTagFilters = tagSummary.some((dimension) => dimension.visible);
+  const showFilterBar = showRegionBar || showTagFilters;
+  const tagFilterValue = useMemo<TagFilterContextValue>(() => {
+    const selectable = new Set<string>();
+    for (const dimension of tagSummary) {
+      if (!dimension.visible) continue;
+      for (const option of dimension.options) {
+        const active = effectiveTagSelection[dimension.id] === option.id;
+        if (active || option.count > 0) selectable.add(`${dimension.id}\0${option.id}`);
+      }
+    }
+    return {
+      isSelectable(label) {
+        const hit = lookupTagOption(label);
+        return hit ? selectable.has(`${hit.dimensionId}\0${hit.optionId}`) : false;
+      },
+      isActive(label) {
+        const hit = lookupTagOption(label);
+        return hit ? effectiveTagSelection[hit.dimensionId] === hit.optionId : false;
+      },
+      toggle(label) {
+        const hit = lookupTagOption(label);
+        if (!hit || !selectable.has(`${hit.dimensionId}\0${hit.optionId}`)) return;
+        setTagSelection((current) => toggleTagSelection(current, hit.dimensionId, hit.optionId));
+      },
+    };
+  }, [effectiveTagSelection, tagSummary]);
   // 分组标签栏与卡片网格共用列定义，让标签栏左缘对齐首卡。
   const isMini = mode === "mini";
   const isList = mode === "list";
@@ -850,7 +955,7 @@ export function NodeGrid() {
   }
 
   return (
-    <>
+    <TagFilterProvider value={tagFilterValue}>
       {homeHeader}
       {(showGroupTabs || showHomeSort) && (
         // 分组标签落首列、排序钉在末列右侧；窄屏时两者保持在同一控件栏内。
@@ -865,16 +970,22 @@ export function NodeGrid() {
           {showHomeSort && <HomeSortControl state={sort} />}
         </div>
       )}
-      {showRegionBar && (
+      {showFilterBar && (
         <RegionTabs
           regions={regionFilterEnabled ? regionOptions : []}
           selectedRegion={selectedRegion}
           onSelectRegion={setSelectedRegion}
+          tagFilters={tagSummary}
+          tagSelection={effectiveTagSelection}
+          onToggleTag={toggleTag}
+          tagFilterActive={tagFilterActive}
           hiddenCount={hiddenInView}
           onShowAll={showEveryCard}
         />
       )}
-      {orderedUuids.length === 0 && hiddenInView > 0 ? (
+      {orderedUuids.length === 0 && tagFilterActive ? (
+        <p className="home-cards-empty">没有同时符合这些标签的服务器。</p>
+      ) : orderedUuids.length === 0 && hiddenInView > 0 ? (
         <p className="home-cards-empty">这些服务器已从首页隐藏，点「全部显示」恢复。</p>
       ) : isList ? (
         <NodeListView uuids={orderedUuids} />
@@ -885,6 +996,6 @@ export function NodeGrid() {
       ) : (
         gridElement
       )}
-    </>
+    </TagFilterProvider>
   );
 }

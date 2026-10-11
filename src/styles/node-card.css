@@ -188,6 +188,22 @@
   letter-spacing: 0.02em;
 }
 
+button.ip-stack-badge {
+  cursor: pointer;
+}
+
+button.ip-stack-badge:hover {
+  background: color-mix(in srgb, var(--tag-bg) 62%, var(--tag-fg) 18%);
+}
+
+button.ip-stack-badge[data-active="true"] {
+  box-shadow: inset 0 0 0 1.5px var(--tag-fg);
+}
+
+button.ip-stack-badge:focus-visible {
+  outline-offset: 1px;
+}
+
 .server-card-stack {
   display: flex;
   flex-direction: column;
