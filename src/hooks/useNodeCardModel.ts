@@ -33,6 +33,7 @@ import {
   resolveHomepagePingTaskIdsByGroups,
 } from "@/utils/pingTasks";
 import { resolveNodeIpBadges } from "@/utils/ipProfiles";
+import { resolveNodeTrafficReset } from "@/utils/trafficReset";
 
 interface NodeCardModelOptions {
   pingBucketCount?: number;
@@ -62,6 +63,7 @@ export function useNodeCardModel(
     homepageMultiPingTaskIds,
     homepageMultiPingGroups,
     ipProfiles,
+    trafficResets,
   } = useThemeSettings();
   const multiPingActive =
     includeMultiPing &&
@@ -75,6 +77,11 @@ export function useNodeCardModel(
     [homepagePingBindings, multiPingActive, uuid],
   );
   const now = useHourlyClock();
+  const resetNow = useMinuteClock(Boolean(meta && meta.traffic_limit > 0 && trafficResets.length));
+  const trafficReset = useMemo(
+    () => meta ? resolveNodeTrafficReset(meta, trafficResets, resetNow) : null,
+    [meta, trafficResets, resetNow],
+  );
   const ping = useFakePingFallback(
     uuid,
     realPing,
@@ -231,6 +238,7 @@ export function useNodeCardModel(
       remainingLabel: trafficUsage.unlimited ? "∞" : formatBytes(trafficUsage.remaining),
       detail: `${trafficUsedLabel} / ${trafficLimitLabel}`,
       typeLabel: trafficTypeLabel(meta.traffic_limit_type),
+      reset: trafficReset,
     };
 
     return {
@@ -252,6 +260,7 @@ export function useNodeCardModel(
     };
   }, [
     homepagePingLines,
+    trafficReset,
     meta,
     metrics,
     metaModel,

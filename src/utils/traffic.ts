@@ -5,6 +5,7 @@ export interface TrafficDisplay {
   remainingLabel: string;
   detail: string;
   typeLabel: string;
+  reset?: import("./trafficReset").TrafficResetDisplay | null;
 }
 
 function nonNegative(value: number): number {

@@ -18,6 +18,7 @@ import { IpStackBadges } from "./IpStackBadges";
 import { NodeCopyIpPopover } from "./NodeCopyIpPopover";
 import { NodeHideButton } from "./NodeHideButton";
 import { NodeTodayTrafficPopover } from "./NodeTodayTrafficPopover";
+import { TrafficResetHint } from "./TrafficResetHint";
 import { HealthBucketTooltip } from "./HealthBucketTooltip";
 import { useNodeCardModel } from "@/hooks/useNodeCardModel";
 import { useThemeSettings } from "@/hooks/useThemeSettings";
@@ -470,6 +471,7 @@ export const MiniNodeCard = memo(function MiniNodeCard({
       />
       <MiniVitals node={node} loadFraction={loadFraction} />
       <MiniFlow node={node} upRate={upRate} downRate={downRate} />
+      <TrafficResetHint reset={model.traffic.reset} dense />
       <MiniHealth
         ping={ping}
         pingBuckets={pingBuckets}

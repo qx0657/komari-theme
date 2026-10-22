@@ -644,6 +644,11 @@ export function installDevMockApi() {
             { identities: ["Hong Kong Cache"], badges: [{ label: "原生" }, { label: "家宽" }] },
             { identities: ["Sydney Backup"], badges: [{ label: "广播" }, { label: "IDC机房" }] },
           ],
+          trafficResets: [
+            { identities: ["tokyo-edge-01"], day: 1, time: "00:00", timeZone: "Asia/Shanghai" },
+            { identities: ["singapore-api-01"], day: new Date().getUTCDate() % 28 + 1, time: "00:00", timeZone: "UTC" },
+            { identities: ["new-york-worker-01"], day: 11, time: "00:00", timeZone: "America/New_York" },
+          ],
         },
       });
     }

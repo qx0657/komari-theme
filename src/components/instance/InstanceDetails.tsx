@@ -13,6 +13,9 @@ import {
   formatUptimeDays,
 } from "@/utils/format";
 import { resolveTrafficUsage } from "@/utils/traffic";
+import { useThemeSettings } from "@/hooks/useThemeSettings";
+import { resolveNodeTrafficReset } from "@/utils/trafficReset";
+import { TrafficResetHint } from "@/components/node/TrafficResetHint";
 import { InstancePanel } from "./InstancePanel";
 
 // Intl.DateTimeFormat 构造开销大，复用一个实例，别每次 metrics 更新都重建
@@ -30,6 +33,7 @@ export function InstanceDetails({
   onNodeReady?: () => (() => void) | void;
 }) {
   const now = useMinuteClock();
+  const { trafficResets } = useThemeSettings();
   const meta = useNodeMeta(uuid);
   const metrics = useNodeMetrics(uuid);
   const trafficQuery = useTodayTrafficStats([uuid], now, "summary");
@@ -153,6 +157,7 @@ export function InstanceDetails({
                   <span className="instance-info-note">
                     {`${formatBytes(trafficUsage.used)} / ${formatBytes(meta.traffic_limit)}`}
                   </span>
+                  <TrafficResetHint reset={resolveNodeTrafficReset(meta, trafficResets, now)} />
                 </>
               )}
             </div>

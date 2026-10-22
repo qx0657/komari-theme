@@ -50,6 +50,7 @@ import type {
 } from "@/types/komari";
 import type { ByteRateDisplay } from "@/utils/format";
 import type { TrafficDisplay } from "@/utils/traffic";
+import { TrafficResetHint } from "./TrafficResetHint";
 
 const TRAFFIC_DOT_COUNT = 16;
 const HEALTH_BAR_COUNT = 18;
@@ -619,6 +620,7 @@ function CompactTrafficBar({
           </>
         )}
       </div>
+      <TrafficResetHint reset={traffic.reset} />
     </div>
   );
 }

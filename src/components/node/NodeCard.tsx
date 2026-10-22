@@ -43,6 +43,8 @@ import {
 import { IpStackBadges } from "./IpStackBadges";
 import { NodeCopyIpPopover } from "./NodeCopyIpPopover";
 import { NodeHideButton } from "./NodeHideButton";
+import { TrafficResetHint } from "./TrafficResetHint";
+import type { TrafficResetDisplay } from "@/utils/trafficReset";
 import { HealthBucketTooltip } from "./HealthBucketTooltip";
 import { MultiPingStatus } from "./MultiPingStatus";
 import { formatHealthBucketTooltip } from "./pingBucketText";
@@ -147,6 +149,7 @@ export const NodeCard = memo(function NodeCard({
             remainingLabel={traffic.remainingLabel}
             detail={traffic.detail}
             typeLabel={traffic.typeLabel}
+            reset={traffic.reset}
           />
 
           {showConnections && (
@@ -396,11 +399,13 @@ const NodeTrafficQuota = memo(function NodeTrafficQuota({
   remainingLabel,
   detail,
   typeLabel,
+  reset,
 }: {
   litCount: number;
   remainingLabel: string;
   detail: string;
   typeLabel: string;
+  reset?: TrafficResetDisplay | null;
 }) {
   return (
     <div
@@ -428,6 +433,7 @@ const NodeTrafficQuota = memo(function NodeTrafficQuota({
           return <span key={i} className="traffic-quota-segment" style={{ background }} />;
         })}
       </div>
+      <TrafficResetHint reset={reset} />
     </div>
   );
 });

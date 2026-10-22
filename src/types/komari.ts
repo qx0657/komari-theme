@@ -192,6 +192,14 @@ export interface ThemeSettings {
     identities?: string[];
     badges?: Array<string | { label?: string; color?: string }>;
   }>;
+  /** 节点流量重置倒计时。仅用于展示，不修改 agent 的清零配置。 */
+  trafficResets?: Array<{
+    identities: string[];
+    day: number;
+    time?: string;
+    timeZone?: string;
+    shortMonth?: "last-day" | "next-month" | "skip";
+  }>;
   /** 首页 ISP IP余量条；缺省 true。 */
   enableIspStrip?: boolean;
   /** 首页机场条；缺省 true。 */

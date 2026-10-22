@@ -1,4 +1,5 @@
 import type { ThemeSettings } from "@/types/komari";
+import { normalizeTrafficResets, type NodeTrafficReset } from "@/utils/trafficReset";
 import {
   DEFAULT_BACKGROUND_ALIGNMENT,
   DEFAULT_SURFACE_OPACITY,
@@ -106,6 +107,7 @@ export interface ResolvedThemeSettings {
   costRateApiUrl: string;
   extraAssets: ExtraAsset[];
   ipProfiles: NodeIpProfile[];
+  trafficResets: NodeTrafficReset[];
   /** 首页 ISP IP余量条；undefined 视为 true。没有 ISP 条目或 /isp/api 失败时隐藏。 */
   enableIspStrip: boolean;
   /** 首页机场条；undefined 视为 true。没有机场条目时隐藏。 */
@@ -162,6 +164,7 @@ export const DEFAULT_THEME_SETTINGS: ResolvedThemeSettings = {
   costRateApiUrl: DEFAULT_COST_RATE_API_URL,
   extraAssets: [],
   ipProfiles: [],
+  trafficResets: [],
   enableIspStrip: true,
   enableAirportStrip: true,
   airportUsageUrl: "",
@@ -294,6 +297,7 @@ export function normalizeThemeSettings(
     costRateApiUrl: normalizeCostRateApiUrl(settings?.costRateApiUrl),
     extraAssets: normalizeExtraAssets(settings?.extraAssets),
     ipProfiles: normalizeIpProfiles(settings?.ipProfiles),
+    trafficResets: normalizeTrafficResets(settings?.trafficResets),
     // 模块开关：缺省 true，显式 false 才关。没有对应条目，或 ISP 接口失败时，首页不画那一张卡。
     enableIspStrip: enabledUnlessFalse(settings?.enableIspStrip),
     enableAirportStrip: enabledUnlessFalse(settings?.enableAirportStrip),

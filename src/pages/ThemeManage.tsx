@@ -101,6 +101,8 @@ import { normalizeAirportUsagePath, normalizeExtraAssets } from "@/utils/extraAs
 import { normalizeIpProfiles } from "@/utils/ipProfiles";
 import { ExtraAssetsEditor } from "@/components/theme/ExtraAssetsEditor";
 import { IpProfilesEditor } from "@/components/theme/IpProfilesEditor";
+import { TrafficResetsEditor } from "@/components/theme/TrafficResetsEditor";
+import { normalizeTrafficResets, trafficResetError } from "@/utils/trafficReset";
 
 const APPEARANCE_OPTIONS = [
   { value: "light", label: "浅色", icon: Sun },
@@ -331,6 +333,7 @@ function pickManagedThemeSettings(settings: ResolvedThemeSettings) {
     costRateApiUrl: settings.costRateApiUrl,
     extraAssets: settings.extraAssets,
     ipProfiles: settings.ipProfiles,
+    trafficResets: settings.trafficResets,
     enableIspStrip: settings.enableIspStrip,
     enableAirportStrip: settings.enableAirportStrip,
     airportUsageUrl: settings.airportUsageUrl,
@@ -1491,7 +1494,7 @@ export function ThemeManage() {
   // 编辑),口径与资产统计页完全一致(同一个 calculateCostSummary),但不叠加溢价本身。
   // 刻意用一次性 getNodes 查询而不是 useAllNodeMeta():后者会启动全局节点 store 的实时
   // 状态轮询(wsStore),设置页只需要静态 meta,不该为一列参考值挂一个常驻轮询。
-  const { data: allMeta = [] } = useQuery({
+  const { data: allMeta = [], isPending: nodeMetaLoading, isError: nodeMetaError, refetch: refetchNodeMeta } = useQuery({
     queryKey: ["theme-manage", "node-meta"],
     queryFn: ({ signal }) => getNodes({ signal }),
     staleTime: 60_000,
@@ -1654,6 +1657,7 @@ export function ThemeManage() {
       extraAssets: normalizeExtraAssets(rest.extraAssets),
       airportUsageUrl: normalizeAirportUsagePath(rest.airportUsageUrl),
       ipProfiles: normalizeIpProfiles(rest.ipProfiles),
+      trafficResets: normalizeTrafficResets(rest.trafficResets),
       backgroundImage: normalizeBackgroundUrl(rest.backgroundImage),
       backgroundImageMobile: normalizeBackgroundUrl(rest.backgroundImageMobile),
       backgroundAlignment: normalizeBackgroundAlignment(rest.backgroundAlignment),
@@ -1674,7 +1678,9 @@ export function ThemeManage() {
   // 空名称的新行会被保存时丢掉，但编辑过程中仍要让表单保持 dirty。
   const extraAssetsDirty =
     JSON.stringify(draft.extraAssets) !== JSON.stringify(sourceThemeSettings.extraAssets);
-  const isDirty = draftSignature !== sourceSignature || costRateApiUrlDirty || extraAssetsDirty;
+  const trafficResetsDirty =
+    JSON.stringify(draft.trafficResets) !== JSON.stringify(sourceThemeSettings.trafficResets);
+  const isDirty = draftSignature !== sourceSignature || costRateApiUrlDirty || extraAssetsDirty || trafficResetsDirty;
 
   // 用户重新编辑后清掉「已保存」提示,避免过期的成功提示和 dirty 表单并存。
   useEffect(() => {
@@ -1718,8 +1724,9 @@ export function ThemeManage() {
     return map;
   }, [draft.homepageMultiPingGroups]);
 
+  const draftTrafficResetsInvalid = draft.trafficResets.some((rule) => trafficResetError(rule) !== null);
   const handleSave = async () => {
-    if (!config?.theme || savingDraftRef.current || draftMultiPingInvalid) return;
+    if (!config?.theme || savingDraftRef.current || draftMultiPingInvalid || draftTrafficResetsInvalid) return;
     const submittedEditVersion = editVersionRef.current;
     savingDraftRef.current = draft;
     setSaving(true);
@@ -1858,7 +1865,7 @@ export function ThemeManage() {
               type="button"
               onClick={handleSave}
               disabled={
-                !isDirty || saving || draftCostRateApiUrlInvalid || draftMultiPingInvalid
+                !isDirty || saving || draftCostRateApiUrlInvalid || draftMultiPingInvalid || draftTrafficResetsInvalid
               }
               className="theme-manage-button is-primary"
             >
@@ -2496,6 +2503,15 @@ export function ThemeManage() {
         />
 
         <IspCredentialsPanel />
+
+        <TrafficResetsEditor
+          nodes={allMeta}
+          rules={draft.trafficResets}
+          loading={nodeMetaLoading}
+          error={nodeMetaError}
+          onRetry={() => void refetchNodeMeta()}
+          onChange={(trafficResets) => patch("trafficResets", trafficResets)}
+        />
 
         <IpProfilesEditor
           profiles={draft.ipProfiles}

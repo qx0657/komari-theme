@@ -5,6 +5,7 @@ import { clsx } from "clsx";
 import { Flag } from "@/components/ui/Flag";
 import { OsLogo } from "@/components/ui/OsLogo";
 import { useNodeCardModel } from "@/hooks/useNodeCardModel";
+import { TrafficResetHint } from "./TrafficResetHint";
 import { usePreferences } from "@/hooks/usePreferences";
 import { useMetricColorsVersion } from "@/hooks/useMetricColors";
 import { formatBytes } from "@/utils/format";
@@ -376,6 +377,7 @@ const NodeRow = memo(function NodeRow({ uuid }: { uuid: string }) {
         <span className="node-list-traffic-quota" style={{ color: traffic.color }}>
           {usedPct}
         </span>
+        <TrafficResetHint reset={traffic.reset} dense />
       </div>
 
       <div className="node-list-cell col-net">
