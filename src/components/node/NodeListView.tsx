@@ -377,7 +377,7 @@ const NodeRow = memo(function NodeRow({ uuid }: { uuid: string }) {
         <span className="node-list-traffic-quota" style={{ color: traffic.color }}>
           {usedPct}
         </span>
-        <TrafficResetHint reset={traffic.reset} dense />
+        <TrafficResetHint reset={traffic.reset} reserveSpace={traffic.reserveResetSpace} dense />
       </div>
 
       <div className="node-list-cell col-net">

@@ -15,6 +15,8 @@ Junimo 2.0.2 的 Glow 分支。视觉世界是深色卡片（16px 圆角、四�
 
 ## Tokens
 
+流量重置提示在配置非空时为所有卡片预留同一行高，空行仅用于对齐，不显示占位文字、不参与键盘或读屏访问；没有任何重置规则时移除预留行。大卡、小卡、迷你卡与列表沿用同一规则。
+
 沿用 Junimo `src/styles/tokens.css`。新增块只用 `--surface-a`、`--hairline`、`--text-*`、`--status-*`、`--progress-network`。
 
 ## Provenance

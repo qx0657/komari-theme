@@ -6,6 +6,7 @@ export interface TrafficDisplay {
   detail: string;
   typeLabel: string;
   reset?: import("./trafficReset").TrafficResetDisplay | null;
+  reserveResetSpace?: boolean;
 }
 
 function nonNegative(value: number): number {

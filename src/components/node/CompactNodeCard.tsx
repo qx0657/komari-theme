@@ -620,7 +620,7 @@ function CompactTrafficBar({
           </>
         )}
       </div>
-      <TrafficResetHint reset={traffic.reset} />
+      <TrafficResetHint reset={traffic.reset} reserveSpace={traffic.reserveResetSpace} />
     </div>
   );
 }

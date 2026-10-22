@@ -1,13 +1,18 @@
 import { ChevronDown, RotateCcw } from "lucide-react";
 import type { TrafficResetDisplay } from "@/utils/trafficReset";
 
-export function TrafficResetHint({ reset, dense = false }: {
+export function TrafficResetHint({ reset, dense = false, reserveSpace = false }: {
   reset?: TrafficResetDisplay | null;
   dense?: boolean;
+  reserveSpace?: boolean;
 }) {
-  if (!reset) return null;
+  // 同一组卡片保留一致的提示行；空行不暴露文案或键盘焦点。
+  const className = `traffic-reset${dense ? " is-dense" : ""}`;
+  if (!reset) return reserveSpace
+    ? <div className={`${className} is-empty`} aria-hidden="true" />
+    : null;
   return (
-    <details className={`traffic-reset${dense ? " is-dense" : ""}`}>
+    <details className={className}>
       <summary aria-label={`流量${reset.countdown}，${reset.exact}，查看重置规则`}>
         <RotateCcw size={12} aria-hidden />
         <span className="traffic-reset-countdown">{reset.countdown}</span>

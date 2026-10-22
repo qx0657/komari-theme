@@ -471,7 +471,7 @@ export const MiniNodeCard = memo(function MiniNodeCard({
       />
       <MiniVitals node={node} loadFraction={loadFraction} />
       <MiniFlow node={node} upRate={upRate} downRate={downRate} />
-      <TrafficResetHint reset={model.traffic.reset} dense />
+      <TrafficResetHint reset={model.traffic.reset} reserveSpace={model.traffic.reserveResetSpace} dense />
       <MiniHealth
         ping={ping}
         pingBuckets={pingBuckets}

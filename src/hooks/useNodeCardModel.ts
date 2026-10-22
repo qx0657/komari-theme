@@ -77,6 +77,7 @@ export function useNodeCardModel(
     [homepagePingBindings, multiPingActive, uuid],
   );
   const now = useHourlyClock();
+  const reserveResetSpace = trafficResets.length > 0;
   const resetNow = useMinuteClock(Boolean(meta && meta.traffic_limit > 0 && trafficResets.length));
   const trafficReset = useMemo(
     () => meta ? resolveNodeTrafficReset(meta, trafficResets, resetNow) : null,
@@ -239,6 +240,7 @@ export function useNodeCardModel(
       detail: `${trafficUsedLabel} / ${trafficLimitLabel}`,
       typeLabel: trafficTypeLabel(meta.traffic_limit_type),
       reset: trafficReset,
+      reserveResetSpace,
     };
 
     return {
@@ -261,6 +263,7 @@ export function useNodeCardModel(
   }, [
     homepagePingLines,
     trafficReset,
+    reserveResetSpace,
     meta,
     metrics,
     metaModel,

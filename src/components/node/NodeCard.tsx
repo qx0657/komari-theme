@@ -150,6 +150,7 @@ export const NodeCard = memo(function NodeCard({
             detail={traffic.detail}
             typeLabel={traffic.typeLabel}
             reset={traffic.reset}
+            reserveResetSpace={traffic.reserveResetSpace}
           />
 
           {showConnections && (
@@ -400,12 +401,14 @@ const NodeTrafficQuota = memo(function NodeTrafficQuota({
   detail,
   typeLabel,
   reset,
+  reserveResetSpace,
 }: {
   litCount: number;
   remainingLabel: string;
   detail: string;
   typeLabel: string;
   reset?: TrafficResetDisplay | null;
+  reserveResetSpace?: boolean;
 }) {
   return (
     <div
@@ -433,7 +436,7 @@ const NodeTrafficQuota = memo(function NodeTrafficQuota({
           return <span key={i} className="traffic-quota-segment" style={{ background }} />;
         })}
       </div>
-      <TrafficResetHint reset={reset} />
+      <TrafficResetHint reset={reset} reserveSpace={reserveResetSpace} />
     </div>
   );
 });
